@@ -172,12 +172,13 @@ async def stream_session(socket, text: str, profile: dict, target) -> int:
             await sender
 
 
-async def synthesize(text: str, profile: dict, key: str, partial: Path) -> None:
+async def synthesize(text: str, profile: dict, key: str, partial: Path, direct: bool = False) -> None:
     from websockets.asyncio.client import connect
     headers = {"X-Api-Key": key, "X-Api-Resource-Id": profile["resource_id"],
                "X-Api-Connect-Id": str(uuid.uuid4())}
     # A single connection attempt; never use connect as an automatic-retry iterator.
-    async with connect(URL, additional_headers=headers, open_timeout=30, close_timeout=5,
+    async with connect(URL, additional_headers=headers, proxy=None if direct else True,
+                       open_timeout=30, close_timeout=5,
                        max_size=10 * 1024 * 1024) as socket:
         with partial.open("xb") as output:
             await asyncio.wait_for(stream_session(socket, text, profile, output), timeout=1800)
@@ -203,6 +204,8 @@ def main() -> int:
     parser.add_argument("--resource-id")
     parser.add_argument("--model")
     parser.add_argument("--voice-confirmed", action="store_true")
+    parser.add_argument("--direct", action="store_true",
+                        help="Bypass the system proxy for the speech WebSocket connection")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     paid_attempt = False
@@ -234,7 +237,7 @@ def main() -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         partial = args.output.with_name(args.output.name + "." + uuid.uuid4().hex + ".partial")
         paid_attempt = True
-        asyncio.run(synthesize(text, profile, key, partial))
+        asyncio.run(synthesize(text, profile, key, partial, args.direct))
         duration = validate_audio(partial, ffprobe, ffmpeg)
         # Windows rename refuses to replace an existing file; POSIX requires link.
         if os.name == "nt":

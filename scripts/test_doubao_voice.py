@@ -227,7 +227,7 @@ class WorkflowTests(unittest.TestCase):
             mocks["synthesize"].assert_not_called()
 
     def test_completed_result_records_hashes_and_never_records_key(self):
-        async def complete(text, profile, key, partial):
+        async def complete(text, profile, key, partial, direct=False):
             partial.write_bytes(b"fixture-complete-mp3")
         with tempfile.TemporaryDirectory() as directory, patch.object(tts.subprocess, "run", return_value=subprocess.CompletedProcess([], 0)):
             code, report, mocks = self.invoke(directory, ["--voice-confirmed"], read_api_key={"return_value": "fixture-only-private-value"}, find_executable={"return_value": "fixture-media-tool"}, synthesize={"new_callable": AsyncMock, "side_effect": complete}, validate_audio={"return_value": 1.25})
@@ -241,7 +241,7 @@ class WorkflowTests(unittest.TestCase):
             mocks["synthesize"].assert_awaited_once()
 
     def test_interrupted_paid_attempt_keeps_partial_without_retry_or_key_echo(self):
-        async def interrupted(text, profile, key, partial):
+        async def interrupted(text, profile, key, partial, direct=False):
             partial.write_bytes(b"fixture-partial-audio")
             raise ValueError("untrusted exception with fixture-only-private-value")
         with tempfile.TemporaryDirectory() as directory, patch.object(tts.subprocess, "run", return_value=subprocess.CompletedProcess([], 0)):
@@ -255,7 +255,7 @@ class WorkflowTests(unittest.TestCase):
             mocks["synthesize"].assert_awaited_once()
 
     def test_output_created_during_synthesis_is_not_overwritten(self):
-        async def collide(text, profile, key, partial):
+        async def collide(text, profile, key, partial, direct=False):
             partial.write_bytes(b"new generated audio")
             (partial.parent / "narration.mp3").write_bytes(b"concurrent existing output")
         with tempfile.TemporaryDirectory() as directory, patch.object(tts.subprocess, "run", return_value=subprocess.CompletedProcess([], 0)):

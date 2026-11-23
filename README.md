@@ -110,6 +110,23 @@ flowchart LR
 #### ⏱️ Coli 本地离线语音识别与音文核验
 - 无论采用哪种配音方式，Agent 都会调用本地 **Coli（基于 sherpa-onnx）** 离线生成带精准时间戳的 `.srt` 字幕，并**自动对照你的定稿原文核对人名、地名与专有名词**，为后续分镜提供毫秒级的时间依据。
 
+#### 🔁 ASR → LLM 重写模式
+
+当输入是一段已有音频、视频或第三方口播时，推荐使用独立的 ASR 重写链路：
+
+```text
+原始音频 → Coli ASR（保存原始文字与 token 时间）
+        → AICost 理解、重组、仿写新文案
+        → 新 narration.txt
+        → 重新豆包配音
+        → 对新 MP3 再跑 Coli 获取时间依据
+        → 用新文案生成字幕、分镜、图片和剪映草稿
+```
+
+原始 ASR 只用于内容理解和时间证据。新版本的字幕、分镜旁白和草稿文本全部来自 LLM 确认后的 `narration.txt`，不能直接把 ASR 错字写入字幕，也不能把旧文案当作新稿正文。完整字段、版本关系和失败处理见 [`references/asr-llm-rewrite.md`](references/asr-llm-rewrite.md)。
+
+可迁移的非敏感模型、音色、画幅和超时配置见 [`config.example.json`](config.example.json)。AICost 和豆包 API Key 仍通过本机安全配置保存，仓库只保留配置结构和模型参数。
+
 ---
 
 ### 4️⃣ 剪映专业版草稿导出：推拉运镜与时间轴一键成型

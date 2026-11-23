@@ -20,6 +20,9 @@
     "scope": "本次明确要求的产物或镜号"
   },
   "artifacts": {
+    "asr_raw": null,
+    "rewrite_prompt": null,
+    "rewrite_manuscript": null,
     "manuscript": null,
     "facts": null,
     "audio": null,
@@ -38,6 +41,7 @@
 - `last_request.stages` 仅描述本次操作范围，下次不自动继承。用户没有提出新的阶段时，从其“继续/补图/重做草稿”意图解析；只保留项目设置与可复用成果。
 - progress 按需记录 writing、voice、storyboard、images、timing、semantic_review、draft；可用 pending、draft、verified、needs_review、blocked。写清已完成范围，例如已生成镜号；没有实际核验不能写 verified。
 - voice_mode可为doubao、provided、none。音色参数、确认依据、正文与音频哈希保存在项目voice.json或音频同名.voice.json，artifacts.audio只引用真实生成或已提供的文件；不保存API Key或凭据文件副本。
+- ASR → LLM 重写项目额外记录 `artifacts.asr_raw`、`artifacts.rewrite_prompt` 和 `artifacts.rewrite_manuscript`。`manuscript` 指向最终确认的新正文，不能指向原始 ASR 或旧文案。每个 artifact 只填写真实存在文件及实际哈希。
 - track 与 writing_profile 分别表示题材与写法；style_id 是图片画风。关闭写作时允许前两项为空，关闭配图且只复用图片时无需重新询问画风。
 - content_mode 区分 factual、legend、fictionalized、fiction；民间故事有多个版本时记录所用版本和改编范围。
 - 已有上游 timing_basis、text_audio_review、storyboard_status、逐镜 observed_content 等仍保存在原 STORYBOARD.json / semantic_alignment.json 中，本文件引用它们，不另维护一套切点。
@@ -60,6 +64,7 @@
 - 只有配图：接受现成定稿和最终配音；纯文本请求按 text_only 完成，未对齐草稿不冒充已可用于口播生图。
 - 只有草稿：接受外部提供的图片与分镜；核对来源、音文和实际图像后补证据，无需原写作模块先“完成”。缺封面记为可选事项，不阻断。
 - 全流程：写完若没有最终配音，按[豆包配音](doubao-voice.md)引导配置并确认音色，生成MP3后再推进真实时间轴；配音尚未就绪时保留正文、可做的分镜草稿与缺口。已有MP3时复用，不重复收费，不按估算时间制作“精确草稿”。
+- ASR → LLM 重写全流程：先保存原始 ASR，再调用 LLM 生成新正文；新正文确认后重新配音和转录，字幕、分镜和草稿只使用新正文与新音频。原始 ASR 仅作内容理解和 token 时间证据。
 - 指定关闭某阶段却缺该阶段产物：报告具体文件/镜号缺口，停止依赖该缺口的后续动作，继续独立工作。不重新询问已经明确的开关。
 
 交付时区分本次完成、沿用已有与尚待处理，不要求用户理解内部 JSON 字段。

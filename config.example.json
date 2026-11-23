@@ -1,0 +1,33 @@
+{
+  "aicost": {
+    "base": "https://aicost.me/v1",
+    "text_models": [
+      "gemini-4-neon",
+      "gemini-4-argon"
+    ],
+    "image_models": [
+      "gpt-image-2.6-flare",
+      "gpt-image-2.6-sunburst"
+    ],
+    "request_timeout_seconds": 420
+  },
+  "voice": {
+    "speaker": "zh_male_cixingjieshuonan_uranus_bigtts",
+    "resource_id": "seed-tts-2.0",
+    "model": null,
+    "speech_rate": 0,
+    "loudness_rate": 0,
+    "direct_connection": true
+  },
+  "draft": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "subtitles": "new_narration_text",
+    "drafts_root": null
+  },
+  "secrets": {
+    "aicost_key": "stored outside the repository",
+    "doubao_tts_key": "stored outside the repository"
+  }
+}
