@@ -127,6 +127,8 @@ flowchart LR
 
 可迁移的非敏感模型、音色、画幅和超时配置见 [`config.example.json`](config.example.json)。AICost 和豆包 API Key 仍通过本机安全配置保存，仓库只保留配置结构和模型参数。
 
+本期人物故事的脱敏交接信息保存在 [`handoff/xiao-minghua-v03.md`](handoff/xiao-minghua-v03.md)，用于在另一台电脑恢复版本关系和未完成事项。
+
 ---
 
 ### 4️⃣ 剪映专业版草稿导出：推拉运镜与时间轴一键成型
